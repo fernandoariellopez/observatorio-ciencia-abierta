@@ -1,0 +1,28 @@
+{
+  "subgrupo": "SG1",
+  "nombre": "Políticas de Ciencia Abierta",
+  "peso_global": 25,
+  "tipo_dato": "EST",
+  "indicadores": [
+    {"id": "1.1", "nombre": "Ley nacional de acceso/ciencia abierta", "peso": 35, "eje": "Marco normativo", "fuente": "ROARMAP · normativa nacional · SPARC", "calculo": "Sin marco (0) · en discusión (25) · ley sin reglamentar (60) · ley reglamentada (85) · ley reglamentada y vigente con financiamiento (100)", "periodicidad": "Anual"},
+    {"id": "1.2", "nombre": "Marco normativo de agencias nacionales de CyT", "peso": 20, "eje": "Marco normativo", "fuente": "Normativa de agencias · planes nacionales CTI", "calculo": "Ausente (0) · lineamiento general (40) · política específica (70) · política con mandato e instrumentos (100)", "periodicidad": "Anual"},
+    {"id": "1.3", "nombre": "Mandatos institucionales (universidades y organismos)", "peso": 20, "eje": "Marco normativo", "fuente": "ROARMAP · relevamiento institucional", "calculo": "% de instituciones con mandato vigente, normalizado por país", "periodicidad": "Anual"},
+    {"id": "1.4", "nombre": "Adhesión a la Recomendación UNESCO sobre Ciencia Abierta", "peso": 5, "eje": "Marco normativo", "fuente": "UNESCO · informes nacionales de implementación", "calculo": "Sin adhesión (0) · adhesión declarativa (40) · plan de implementación (70) · implementación con seguimiento (100)", "periodicidad": "Anual"},
+    {"id": "1.5", "nombre": "Política de datos abiertos de investigación", "peso": 15, "eje": "Datos", "fuente": "Normativa · planes nacionales CTI", "calculo": "Ausente (0) · mención general (40) · política específica (70) · política con infraestructura asociada (100)", "periodicidad": "Anual"},
+    {"id": "1.6", "nombre": "Política Nacional de datos abiertos de gobierno", "peso": 5, "eje": "Datos", "fuente": "Normativa · planes nacionales de Gobierno Abierto · Open Government Partnership", "calculo": "Sin marco (0) · en discusión (25) · ley sin reglamentar (50) · ley reglamentada (65) · ley reglamentada y vigente con financiamiento (85) · con infraestructura asociada (100)", "periodicidad": "Anual"}
+  ],
+  "valores": {
+    "AR": {"1.1": 90, "1.2": 85, "1.3": 82, "1.4": 80, "1.5": 78, "1.6": 80},
+    "BR": {"1.1": 82, "1.2": 80, "1.3": 78, "1.4": 78, "1.5": 80, "1.6": 78},
+    "MX": {"1.1": 80, "1.2": 78, "1.3": 75, "1.4": 76, "1.5": 74, "1.6": 75},
+    "CL": {"1.1": 74, "1.2": 72, "1.3": 70, "1.4": 72, "1.5": 70, "1.6": 70},
+    "CO": {"1.1": 76, "1.2": 74, "1.3": 72, "1.4": 74, "1.5": 72, "1.6": 72},
+    "PE": {"1.1": 72, "1.2": 68, "1.3": 64, "1.4": 66, "1.5": 64, "1.6": 62},
+    "UY": {"1.1": 60, "1.2": 62, "1.3": 60, "1.4": 64, "1.5": 60, "1.6": 60},
+    "EC": {"1.1": 54, "1.2": 54, "1.3": 52, "1.4": 56, "1.5": 52, "1.6": 50},
+    "CR": {"1.1": 56, "1.2": 56, "1.3": 54, "1.4": 58, "1.5": 54, "1.6": 54},
+    "SV": {"1.1": 38, "1.2": 40, "1.3": 38, "1.4": 44, "1.5": 38, "1.6": 40},
+    "ES": {"1.1": 88, "1.2": 84, "1.3": 82, "1.4": 84, "1.5": 82, "1.6": 84},
+    "VE": {"1.1": 34, "1.2": 36, "1.3": 35, "1.4": 40, "1.5": 36, "1.6": 36}
+  }
+}

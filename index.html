@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Observatorio de Ciencia Abierta — Sur Global</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<style>
+  :root{
+    --teal:#1a5f6e;--teal-osc:#124652;--teal-cla:#3a8a9c;
+    --naranja:#e8541e;--violeta:#6b2c5f;--verde:#7a9b3f;--amarillo:#e8a020;--gris-sob:#3d4f54;
+    --crema:#f4f1ea;--bg:#f4f1ea;--card:#ffffff;--txt:#2b2d33;--txt-cla:#6c757d;--borde:#e2ddd2;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);line-height:1.5;}
+
+  /* Loading overlay */
+  #loading{position:fixed;inset:0;background:var(--crema);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;}
+  #loading .spinner{width:48px;height:48px;border:4px solid var(--borde);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  #loading p{font-size:.9rem;color:var(--txt-cla);}
+  #loading .err{color:var(--naranja);font-size:.85rem;max-width:420px;text-align:center;background:#fae0d5;border:1px solid var(--naranja);border-radius:8px;padding:.7rem 1rem;}
+
+  .hero{background:var(--crema);border-bottom:4px solid var(--teal);padding:1.5rem 2rem 1.2rem;position:relative;overflow:hidden;}
+  .hero-top{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;}
+  .hero-logo{display:flex;align-items:center;gap:1rem;}
+  .clacso-mark{width:54px;height:54px;flex-shrink:0;display:grid;grid-template-columns:1fr 1fr;gap:3px;}
+  .clacso-mark span{display:block;width:100%;height:100%;}
+  .clacso-mark span:nth-child(1){background:var(--violeta);border-radius:50% 50% 0 50%;}
+  .clacso-mark span:nth-child(2){background:var(--naranja);border-radius:50% 50% 50% 0;}
+  .clacso-mark span:nth-child(3){background:var(--amarillo);border-radius:50% 0 50% 50%;}
+  .clacso-mark span:nth-child(4){background:var(--teal-cla);border-radius:0 50% 50% 50%;}
+  .clacso-txt{font-size:.7rem;color:var(--gris-sob);font-weight:700;letter-spacing:.04em;line-height:1.2;}
+  .ca-logo{font-weight:800;font-size:1.55rem;letter-spacing:-.02em;border-left:2px solid var(--borde);padding-left:1.2rem;}
+  .ca-logo .eyebrow{display:block;font-size:.7rem;font-weight:600;letter-spacing:.1em;color:var(--txt-cla);text-transform:uppercase;margin-bottom:.1rem;}
+  .ca-logo .c1{color:var(--teal);}.ca-logo .c2{color:var(--gris-sob);}
+  .ca-logo .year{font-size:.7rem;color:var(--txt-cla);font-weight:600;display:block;margin-top:.05rem;}
+  .hero-lema{font-size:.95rem;color:var(--gris-sob);margin-top:.9rem;max-width:760px;}
+  .hero-lema b{color:var(--naranja);}.hero-lema .v{color:var(--violeta);}.hero-lema .t{color:var(--teal);}.hero-lema .vd{color:var(--verde);}
+  .hero-deco{position:absolute;right:-30px;top:-20px;width:230px;height:200px;opacity:.10;background:radial-gradient(circle at 30% 40%,var(--teal),transparent 60%),radial-gradient(circle at 70% 60%,var(--verde),transparent 55%);}
+  .lang-toggle{display:flex;gap:.3rem;background:#fff;border:1px solid var(--borde);border-radius:8px;padding:.25rem;margin-left:auto;}
+  .lang-toggle button{background:transparent;border:none;color:var(--txt-cla);padding:.3rem .65rem;border-radius:6px;cursor:pointer;font-size:.82rem;font-weight:700;}
+  .lang-toggle button.active{background:var(--teal);color:#fff;}
+  .principios{display:flex;gap:0;flex-wrap:wrap;margin-top:1.1rem;border-top:1px solid var(--borde);padding-top:.9rem;}
+  .principio{flex:1;min-width:120px;display:flex;align-items:center;gap:.5rem;padding:.2rem .6rem;border-right:1px solid var(--borde);}
+  .principio:last-child{border-right:none;}
+  .principio .dot{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem;}
+  .principio .pt{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.02em;color:var(--gris-sob);line-height:1.15;}
+  nav{background:var(--teal);display:flex;gap:.2rem;padding:0 2rem;overflow-x:auto;}
+  nav button{background:transparent;border:none;color:#bfdce2;padding:.8rem 1.1rem;cursor:pointer;font-size:.9rem;font-weight:600;border-bottom:3px solid transparent;white-space:nowrap;transition:.2s;}
+  nav button:hover{color:#fff;}
+  nav button.active{color:#fff;border-bottom-color:var(--amarillo);}
+  main{padding:1.6rem 2rem 3rem;max-width:1240px;margin:0 auto;}
+  .view{display:none;animation:fade .3s ease;}
+  .view.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.6rem;}
+  .kpi{background:var(--card);border-radius:12px;padding:1.1rem 1.2rem;border:1px solid var(--borde);border-left:5px solid var(--teal);}
+  .kpi:nth-child(2){border-left-color:var(--naranja);}.kpi:nth-child(3){border-left-color:var(--amarillo);}.kpi:nth-child(4){border-left-color:var(--verde);}
+  .kpi .num{font-size:1.9rem;font-weight:800;color:var(--teal-osc);line-height:1;}
+  .kpi .lbl{font-size:.82rem;color:var(--txt-cla);margin-top:.35rem;}
+  .kpi .src{font-size:.68rem;color:var(--teal);margin-top:.4rem;font-style:italic;}
+  .section-title{font-size:1.15rem;font-weight:700;color:var(--teal-osc);margin:1.6rem 0 .8rem;display:flex;align-items:center;gap:.5rem;}
+  .badge{font-size:.65rem;background:#fff3df;color:var(--amarillo);padding:.15rem .5rem;border-radius:20px;font-weight:700;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;}
+  @media(max-width:900px){.grid-2{grid-template-columns:1fr;}main{padding:1.2rem;}nav,.hero{padding-left:1.2rem;padding-right:1.2rem;}.principio{min-width:46%;}}
+  .card{background:var(--card);border-radius:12px;padding:1.2rem;border:1px solid var(--borde);}
+  .card h3{font-size:.95rem;color:var(--teal-osc);margin-bottom:.8rem;font-weight:700;}
+  .chart-box{position:relative;height:260px;}
+  table{width:100%;border-collapse:collapse;font-size:.85rem;}
+  th,td{padding:.6rem .7rem;text-align:left;border-bottom:1px solid var(--borde);}
+  th{background:#eaf3f4;color:var(--teal-osc);font-weight:700;font-size:.74rem;text-transform:uppercase;letter-spacing:.02em;}
+  tr:hover td{background:#f7fafa;}
+  .semaforo{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:.4rem;}
+  .s-alto{background:var(--verde);}.s-medio{background:var(--amarillo);}.s-bajo{background:var(--naranja);}
+  .pais-flex{display:grid;grid-template-columns:280px 1fr;gap:1.2rem;}
+  @media(max-width:900px){.pais-flex{grid-template-columns:1fr;}}
+  .pais-list{background:var(--card);border-radius:12px;border:1px solid var(--borde);max-height:640px;overflow-y:auto;}
+  .pais-item{padding:.7rem 1rem;border-bottom:1px solid var(--borde);cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:.88rem;transition:.15s;}
+  .pais-item:hover{background:#f7fafa;}
+  .pais-item.sel{background:#eaf3f4;border-left:4px solid var(--teal);font-weight:700;}
+  .pais-score{font-size:.75rem;font-weight:700;padding:.1rem .5rem;border-radius:20px;}
+  .dim-tag{display:inline-block;font-size:.7rem;padding:.2rem .55rem;border-radius:20px;font-weight:700;margin:.15rem;}
+  .dim-sg1{background:#e3eff1;color:var(--teal);}.dim-sg2{background:#fdf0d8;color:#b5790f;}.dim-sg3{background:#fae0d5;color:var(--naranja);}.dim-sg4{background:#f0e6ee;color:var(--violeta);}.dim-sg5{background:#edf2df;color:#5e7a26;}
+  .legend{display:flex;gap:1rem;flex-wrap:wrap;font-size:.78rem;color:var(--txt-cla);margin-top:.6rem;}
+  .legend span{display:flex;align-items:center;}
+  .nota-datos{font-size:.75rem;color:var(--gris-sob);background:#fff8ec;border:1px solid var(--amarillo);border-radius:8px;padding:.6rem .9rem;margin-bottom:1.2rem;}
+  .pill-real{background:#edf2df;color:#5e7a26;font-size:.65rem;padding:.1rem .45rem;border-radius:10px;font-weight:700;}
+  .pill-sim{background:#fae0d5;color:var(--naranja);font-size:.65rem;padding:.1rem .45rem;border-radius:10px;font-weight:700;}
+  footer{text-align:center;font-size:.78rem;color:var(--txt-cla);padding:1.5rem;border-top:1px solid var(--borde);}
+  footer strong{color:var(--teal);}
+  #mapa-wrap{position:relative;}
+  #mapa svg{width:100%;height:auto;display:block;}
+  .pais-shape{stroke:#fff;stroke-width:.6;cursor:pointer;transition:opacity .15s,stroke-width .15s;}
+  .pais-shape:hover{stroke:var(--teal-osc);stroke-width:1.5;}
+  .map-tooltip{position:absolute;pointer-events:none;background:var(--teal-osc);color:#fff;padding:.5rem .7rem;border-radius:8px;font-size:.8rem;opacity:0;transition:opacity .15s;z-index:10;box-shadow:0 4px 14px rgba(0,0,0,.25);}
+  .map-tooltip b{display:block;font-size:.92rem;margin-bottom:.15rem;}
+  .map-legend{display:flex;gap:.6rem;align-items:center;font-size:.75rem;color:var(--txt-cla);margin-top:.6rem;flex-wrap:wrap;}
+  .map-scale{display:flex;align-items:center;gap:0;}
+  .map-scale i{width:26px;height:12px;display:block;}
+  .timeline{position:relative;margin:1rem 0 .4rem;padding-left:1.2rem;border-left:2px solid var(--borde);}
+  .tl-item{position:relative;padding:0 0 .9rem .9rem;}
+  .tl-item::before{content:"";position:absolute;left:-1.55rem;top:.2rem;width:11px;height:11px;border-radius:50%;background:var(--teal);border:2px solid #fff;}
+  .tl-year{font-weight:800;color:var(--teal);font-size:.82rem;}
+  .tl-txt{font-size:.83rem;color:var(--txt);}
+  .pesos-panel{background:#eaf3f4;border:1px solid #cfe3e6;border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.4rem;}
+  .pesos-panel h3{font-size:.92rem;color:var(--teal-osc);margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem;}
+  .pesos-row{display:grid;grid-template-columns:repeat(5,1fr);gap:.8rem;}
+  @media(max-width:900px){.pesos-row{grid-template-columns:1fr 1fr;}}
+  .peso-item{background:#fff;border-radius:8px;padding:.6rem;border:1px solid var(--borde);}
+  .peso-item label{font-size:.72rem;font-weight:700;display:block;margin-bottom:.3rem;line-height:1.2;}
+  .peso-item input[type=range]{width:100%;}
+  .peso-item .val{font-size:1.1rem;font-weight:800;text-align:center;}
+  .peso-tot{font-size:.78rem;font-weight:700;padding:.3rem .7rem;border-radius:8px;margin-left:auto;}
+  .pt-ok{background:#edf2df;color:#5e7a26;}.pt-warn{background:#fae0d5;color:var(--naranja);}
+  .formula{font-family:ui-monospace,monospace;font-size:.78rem;background:#fff;border:1px solid var(--borde);border-radius:8px;padding:.6rem .8rem;margin-top:.7rem;color:var(--teal-osc);}
+  .ind-table{font-size:.8rem;}
+  .ind-table td{padding:.4rem .6rem;}
+  .ind-sub{font-weight:700;color:var(--teal-osc);background:#f3faf5;}
+  .fuente-tag{font-size:.68rem;color:var(--txt-cla);font-style:italic;}
+</style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div id="loading">
+  <div class="spinner"></div>
+  <p id="loadingMsg">Cargando datos del observatorio…</p>
+</div>
+
+<div class="hero">
+  <div class="hero-deco"></div>
+  <div class="hero-top">
+    <div class="hero-logo">
+      <div class="clacso-mark"><span></span><span></span><span></span><span></span></div>
+      <div class="clacso-txt">CLACSO<br><span style="font-weight:400;">Consejo Latinoamericano<br>de Ciencias Sociales</span></div>
+    </div>
+    <div class="ca-logo">
+      <span class="eyebrow" data-i18n="eyebrow">Grupo de trabajo CLACSO</span>
+      <span class="c1">CIENCIA ABIERTA</span> <span class="c2">como BIEN COMÚN</span>
+      <span class="year">2026–2028 · Observatorio</span>
+    </div>
+    <div class="lang-toggle">
+      <button id="es" class="active" onclick="setLang('es')">ES</button>
+      <button id="pt" onclick="setLang('pt')">PT</button>
+      <button id="en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+  <p class="hero-lema" data-i18n="lema"><b>Producción</b>, <span class="v">gestión</span>, <span class="t">movilización</span> y <span class="vd">apropiación</span> social del conocimiento para el bien común. Conocimiento abierto, justicia epistémica y soberanía científica para América Latina y el Caribe.</p>
+  <div class="principios">
+    <div class="principio"><span class="dot" style="background:var(--teal);">∞</span><span class="pt" data-i18n="pr1">Acceso<br>abierto</span></div>
+    <div class="principio"><span class="dot" style="background:var(--violeta);">◍</span><span class="pt" data-i18n="pr2">Colaboración<br>y comunidad</span></div>
+    <div class="principio"><span class="dot" style="background:var(--naranja);">▤</span><span class="pt" data-i18n="pr3">Infraestructuras<br>abiertas</span></div>
+    <div class="principio"><span class="dot" style="background:var(--amarillo);">▥</span><span class="pt" data-i18n="pr4">Evaluación<br>responsable</span></div>
+    <div class="principio"><span class="dot" style="background:var(--verde);">⚖</span><span class="pt" data-i18n="pr5">Justicia<br>epistémica</span></div>
+    <div class="principio"><span class="dot" style="background:var(--gris-sob);">⊕</span><span class="pt" data-i18n="pr6">Soberanía<br>tecnológica</span></div>
+  </div>
+</div>
+
+<nav>
+  <button class="active" onclick="showView('home',this)" data-i18n="nav_home">Vista general</button>
+  <button onclick="showView('mapa',this)" data-i18n="nav_mapa">Mapa</button>
+  <button onclick="showView('dimensiones',this)" data-i18n="nav_dim">Dimensiones</button>
+  <button onclick="showView('paises',this)" data-i18n="nav_paises">Perfiles por país</button>
+  <button onclick="showView('metodo',this)" data-i18n="nav_metodo">Metodología</button>
+  <button onclick="showView('global',this)" data-i18n="nav_global">Sur Global</button>
+</nav>
+
+<main>
+  <section id="home" class="view active">
+    <div class="nota-datos" data-i18n="nota">ⓘ Versión 2.1 — El índice se calcula en vivo desde los archivos JSON de datos (<code>data/SG1.json</code>…<code>SG5.json</code>). Combina datos reales marcados como <span class="pill-real">REAL</span> con valores representativos marcados como <span class="pill-sim">EST.</span></div>
+    <div class="pesos-panel">
+      <h3 data-i18n="pesos_h">⚖ Ponderación de subgrupos en el índice global <span class="peso-tot" id="pesoTot"></span></h3>
+      <div class="pesos-row" id="pesosRow"></div>
+      <div class="formula" id="formula"></div>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="num">23.083</div><div class="lbl" data-i18n="kpi1">Revistas OA indexadas en DOAJ (global)</div><div class="src">DOAJ · jun 2026 <span class="pill-real">REAL</span></div></div>
+      <div class="kpi"><div class="num">14.325</div><div class="lbl" data-i18n="kpi2">Revistas sin cargos (modelo diamante/sin APC)</div><div class="src">DOAJ · jun 2026 <span class="pill-real">REAL</span></div></div>
+      <div class="kpi"><div class="num">+4M</div><div class="lbl" data-i18n="kpi3">Publicaciones en repositorios latinoamericanos federados</div><div class="src">Red Rep. Latinoam. <span class="pill-real">REAL</span></div></div>
+      <div class="kpi"><div class="num">10</div><div class="lbl" data-i18n="kpi4">Países miembros activos de LA Referencia</div><div class="src">LA Referencia <span class="pill-real">REAL</span></div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card"><h3 data-i18n="h_avance">Índice de avance en ciencia abierta por país <span class="pill-sim">EST.</span></h3><div class="chart-box"><canvas id="chartPaises"></canvas></div></div>
+      <div class="card"><h3 data-i18n="h_modelo">Modelo de publicación predominante (región) <span class="pill-real">REAL</span></h3><div class="chart-box"><canvas id="chartModelo"></canvas></div><p style="font-size:.78rem;color:var(--txt-cla);margin-top:.6rem;" data-i18n="modelo_nota">América Latina lidera el modelo diamante: sin cargos para autores ni lectores, financiado por universidades y Estados.</p></div>
+    </div>
+    <div class="section-title" data-i18n="h_tabla">Resumen regional por país</div>
+    <div class="card">
+      <div class="legend" style="margin-bottom:.7rem;">
+        <span><span class="semaforo s-alto"></span> <span data-i18n="leg_alto">Avance alto (≥70)</span></span>
+        <span><span class="semaforo s-medio"></span> <span data-i18n="leg_medio">Avance medio (40–69)</span></span>
+        <span><span class="semaforo s-bajo"></span> <span data-i18n="leg_bajo">Avance inicial (&lt;40)</span></span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table id="tablaResumen"><thead><tr>
+          <th data-i18n="th_pais">País</th><th data-i18n="th_indice">Índice global</th>
+          <th>SG1</th><th>SG2</th><th>SG3</th><th>SG4</th><th>SG5</th><th data-i18n="th_ley">Ley/Política OA</th>
+        </tr></thead><tbody></tbody></table>
+      </div>
+      <div class="legend" style="margin-top:.8rem;">
+        <span><span class="dim-tag dim-sg1">SG1</span> <span data-i18n="d1">Políticas de Ciencia Abierta</span></span>
+        <span><span class="dim-tag dim-sg2">SG2</span> <span data-i18n="d2">Infraestructuras y soberanía de datos</span></span>
+        <span><span class="dim-tag dim-sg3">SG3</span> <span data-i18n="d3">Divulgación y Formación</span></span>
+        <span><span class="dim-tag dim-sg4">SG4</span> <span data-i18n="d4">Evaluación</span></span>
+        <span><span class="dim-tag dim-sg5">SG5</span> <span data-i18n="d5">Ciencia Ciudadana y Articulación</span></span>
+      </div>
+    </div>
+  </section>
+
+  <section id="mapa" class="view">
+    <div class="section-title" data-i18n="m_title">Mapa interactivo del índice de avance <span class="badge">EST.</span></div>
+    <div class="card">
+      <div id="mapa-wrap"><div id="mapa"></div><div class="map-tooltip" id="mapTooltip"></div></div>
+      <div class="map-legend">
+        <span data-i18n="m_leg">Índice de avance:</span><span>0</span>
+        <div class="map-scale" id="mapScale"></div><span>100</span>
+        <span style="margin-left:1rem;"><i style="display:inline-block;width:12px;height:12px;background:#e8ded0;border-radius:2px;vertical-align:middle;"></i> <span data-i18n="m_sindato">Sin dato</span></span>
+      </div>
+      <p style="font-size:.78rem;color:var(--txt-cla);margin-top:.6rem;" data-i18n="m_nota">Pasá el cursor por cada país para ver su índice. Hacé clic para abrir su perfil detallado.</p>
+    </div>
+  </section>
+
+  <section id="dimensiones" class="view">
+    <div class="section-title" data-i18n="dim_intro">Las cinco dimensiones del GT</div>
+    <p style="font-size:.9rem;color:var(--txt-cla);margin-bottom:1.2rem;" data-i18n="dim_desc">Cada dimensión corresponde a un subgrupo del GT y agrupa indicadores específicos.</p>
+    <div class="grid-2">
+      <div class="card"><h3><span class="dim-tag dim-sg1">SG1</span> <span data-i18n="d1">Políticas de Ciencia Abierta</span></h3><div class="chart-box"><canvas id="chartDim1"></canvas></div></div>
+      <div class="card"><h3><span class="dim-tag dim-sg2">SG2</span> <span data-i18n="d2">Infraestructuras y soberanía de datos</span></h3><div class="chart-box"><canvas id="chartDim2"></canvas></div></div>
+      <div class="card"><h3><span class="dim-tag dim-sg3">SG3</span> <span data-i18n="d3">Divulgación y Formación</span></h3><div class="chart-box"><canvas id="chartDim3"></canvas></div></div>
+      <div class="card"><h3><span class="dim-tag dim-sg4">SG4</span> <span data-i18n="d4">Evaluación</span></h3><div class="chart-box"><canvas id="chartDim4"></canvas></div></div>
+      <div class="card"><h3><span class="dim-tag dim-sg5">SG5</span> <span data-i18n="d5">Ciencia Ciudadana y Articulación</span></h3><div class="chart-box"><canvas id="chartDim5"></canvas></div></div>
+    </div>
+  </section>
+
+  <section id="paises" class="view">
+    <div class="section-title" data-i18n="p_title">Perfiles por país</div>
+    <div class="pais-flex"><div class="pais-list" id="paisList"></div><div class="card" id="paisDetalle"></div></div>
+  </section>
+
+  <section id="metodo" class="view">
+    <div class="section-title" data-i18n="met_title">Metodología del índice</div>
+    <div class="card" style="margin-bottom:1.2rem;">
+      <p style="font-size:.88rem;" data-i18n="met_desc">El índice se construye en tres niveles mediante promedio ponderado clásico (compensatorio). Cada indicador (0–100) se pondera dentro de su subgrupo; cada subíndice se pondera dentro del índice global.</p>
+      <div class="formula" id="formula2"></div>
+    </div>
+    <div class="section-title" data-i18n="met_grilla">Grilla de indicadores por subgrupo</div>
+    <div class="card"><div style="overflow-x:auto;"><table class="ind-table" id="grillaInd"></table></div></div>
+  </section>
+
+  <section id="global" class="view">
+    <div class="section-title" data-i18n="g_title">Comparativa Sur Global <span class="badge">EST.</span></div>
+    <p style="font-size:.9rem;color:var(--txt-cla);margin-bottom:1.2rem;" data-i18n="g_desc">América Latina, el Caribe y España en perspectiva con otras regiones del Sur Global.</p>
+    <div class="grid-2">
+      <div class="card"><h3 data-i18n="g_radar">Perfil comparativo por dimensión</h3><div class="chart-box" style="height:340px;"><canvas id="chartRadar"></canvas></div></div>
+      <div class="card"><h3 data-i18n="g_barras">Revistas diamante por región (% del total OA)</h3><div class="chart-box" style="height:340px;"><canvas id="chartGlobalBar"></canvas></div></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span data-i18n="foot">Observatorio de Ciencia Abierta · GT "Ciencia Abierta como Bien Común"</span> · <strong>CLACSO 2026–2028</strong><br>
+  <span style="font-size:.7rem;" data-i18n="foot2">Fuentes: DOAJ, LA Referencia, Red de Repositorios Latinoamericanos, Redalyc, SciELO · Versión 2.1</span>
+</footer>
+
+<script>
+// ============================================================
+// METADATOS DE PAÍSES (no vienen en los JSON de indicadores)
+// ============================================================
+const PAISES_META={
+  AR:{n:"Argentina",ley:"Ley 26.899 (2013)",reposit:"SNRD activo",revistas:"+300 en DOAJ",hitos:[["2013","Ley 26.899 de repositorios digitales abiertos"],["2016","Reglamentación del SNRD"],["2020","Adhesión a recomendaciones regionales OA"],["2023","Avances en datos abiertos de investigación"]]},
+  BR:{n:"Brasil",ley:"Política SciELO/CAPES",reposit:"Red nacional robusta",revistas:"+1500 en DOAJ",hitos:[["1998","Creación de SciELO"],["2012","Expansión de repositorios institucionales"],["2019","Políticas CAPES de acceso abierto"],["2024","Consolidación de datos FAIR"]]},
+  MX:{n:"México",ley:"Ley CTI (reforma 2021)",reposit:"Redalyc/CONAHCYT",revistas:"+600 en DOAJ",hitos:[["2003","Lanzamiento de Redalyc"],["2014","Reforma de Ley CyT con mandato OA"],["2021","Nueva Ley CTI"],["2023","Repositorio Nacional ampliado"]]},
+  CL:{n:"Chile",ley:"Política ANID",reposit:"Nodo LA Referencia",revistas:"+200 en DOAJ",hitos:[["2014","Ingreso a LA Referencia"],["2019","Política de acceso abierto ANID"],["2022","Plan de datos de investigación"]]},
+  CO:{n:"Colombia",ley:"Política MinCiencias",reposit:"Nodo activo",revistas:"+350 en DOAJ",hitos:[["2014","Nodo nacional en LA Referencia"],["2018","Política de ciencia abierta MinCiencias"],["2022","Estrategia de datos abiertos"]]},
+  PE:{n:"Perú",ley:"Ley 30035 (2013)",reposit:"ALICIA/CONCYTEC",revistas:"+150 en DOAJ",hitos:[["2013","Ley 30035 de repositorio nacional"],["2015","Plataforma ALICIA"],["2021","Avances en interoperabilidad"]]},
+  UY:{n:"Uruguay",ley:"En desarrollo",reposit:"Nodo LA Referencia",revistas:"+40 en DOAJ",hitos:[["2016","Incorporación a LA Referencia"],["2020","Avances en repositorios universitarios"],["2024","Discusión de marco normativo"]]},
+  EC:{n:"Ecuador",ley:"Política SENESCYT",reposit:"Nodo activo",revistas:"+60 en DOAJ",hitos:[["2014","Nodo nacional OA"],["2018","Lineamientos SENESCYT"],["2023","Fortalecimiento de repositorios"]]},
+  CR:{n:"Costa Rica",ley:"En desarrollo",reposit:"Nodo LA Referencia",revistas:"+50 en DOAJ",hitos:[["2016","Ingreso a LA Referencia"],["2019","Kimuk: portal nacional"],["2023","Avances en datos abiertos"]]},
+  SV:{n:"El Salvador",ley:"Incipiente",reposit:"Nodo LA Referencia",revistas:"+10 en DOAJ",hitos:[["2017","Primeros repositorios universitarios"],["2021","Incorporación gradual a la red"]]},
+  ES:{n:"España",ley:"Ley Ciencia (reforma 2022)",reposit:"REBIUN/Recolecta",revistas:"+900 en DOAJ",hitos:[["2011","Ley de la Ciencia con mandato OA"],["2017","Recolecta consolidado"],["2022","Reforma Ley de la Ciencia (OA inmediato)"],["2024","Plan de ciencia abierta"]]},
+  VE:{n:"Venezuela",ley:"Sin marco vigente",reposit:"Iniciativas aisladas",revistas:"+30 en DOAJ",hitos:[["2010","Repositorios universitarios pioneros"],["2018","Iniciativas dispersas"]]},
+};
+
+// ============================================================
+// ESTADO GLOBAL (se rellena al cargar los JSON)
+// ============================================================
+let indicadores={};   // {SG1:{nombre,peso_global,items:[{id,n,p,eje,fuente,calculo}]}, ...}
+let valoresPais={};   // {AR:{indicadorId:valor, ...}, ...}
+let paises=[];        // [{iso, n, ley, reposit, revistas, hitos}, ...]
+let pesosSG={SG1:25,SG2:25,SG3:15,SG4:20,SG5:15};
+
+const SG_KEYS=['SG1','SG2','SG3','SG4','SG5'];
+const sgColors=['#1a5f6e','#e8a020','#e8541e','#6b2c5f','#7a9b3f'];
+
+// ============================================================
+// CARGA DE JSON
+// ============================================================
+async function loadJSON(path){
+  const r=await fetch(path);
+  if(!r.ok) throw new Error(`No se pudo cargar ${path} (${r.status})`);
+  return r.json();
+}
+
+async function init(){
+  const msg=document.getElementById('loadingMsg');
+  try{
+    msg.textContent='Cargando SG1…';
+    const [sg1,sg2,sg3,sg4,sg5]=await Promise.all([
+      loadJSON('data/SG1.json'),
+      loadJSON('data/SG2.json'),
+      loadJSON('data/SG3.json'),
+      loadJSON('data/SG4.json'),
+      loadJSON('data/SG5.json'),
+    ]);
+    msg.textContent='Procesando datos…';
+
+    // Construir estructura de indicadores
+    [sg1,sg2,sg3,sg4,sg5].forEach(sg=>{
+      const key=sg.subgrupo;
+      indicadores[key]={
+        nombre:sg.nombre,
+        peso_global:sg.peso_global,
+        tipo_dato:sg.tipo_dato,
+        items:sg.indicadores.map(it=>({id:it.id,n:it.nombre,p:it.peso,eje:it.eje,fuente:it.fuente,calculo:it.calculo,periodicidad:it.periodicidad}))
+      };
+      pesosSG[key]=sg.peso_global;
+      // Acumular valores por país
+      Object.entries(sg.valores).forEach(([iso,vals])=>{
+        if(!valoresPais[iso]) valoresPais[iso]={};
+        Object.assign(valoresPais[iso],vals);
+      });
+    });
+
+    // Construir lista de países a partir de los ISOs en los JSON
+    const isos=Object.keys(PAISES_META);
+    paises=isos.map(iso=>({iso,...PAISES_META[iso],valores:valoresPais[iso]||{}}));
+
+    // Ocultar loading y arrancar
+    document.getElementById('loading').style.display='none';
+    renderPesos();renderTabla();renderPaisList();renderPaisDetalle(paises[0].iso);renderGrilla();buildCharts();
+
+  }catch(err){
+    document.getElementById('loading').innerHTML=`
+      <div class="spinner" style="border-top-color:var(--naranja)"></div>
+      <div class="err">
+        <strong>Error al cargar los datos</strong><br>${err.message}<br><br>
+        Asegurate de que los archivos <code>data/SG1.json</code> … <code>data/SG5.json</code> estén en la carpeta correcta y de que el sitio se sirve desde un servidor web (no abriendo el HTML directamente desde el disco).
+      </div>`;
+  }
+}
+
+// ============================================================
+// CÁLCULO DEL ÍNDICE
+// ============================================================
+function subindice(pais,sgKey){
+  const its=indicadores[sgKey]?.items||[];
+  let suma=0,tot=0;
+  its.forEach(it=>{
+    const v=pais.valores[it.id];
+    if(v!==undefined){suma+=v*it.p;tot+=it.p;}
+  });
+  return tot?suma/tot:0;
+}
+function indiceGlobal(pais){
+  let suma=0,tot=0;
+  SG_KEYS.forEach(sg=>{suma+=subindice(pais,sg)*pesosSG[sg];tot+=pesosSG[sg];});
+  return tot?suma/tot:0;
+}
+function sg(pais,n){return Math.round(subindice(pais,'SG'+n));}
+function idx(pais){return Math.round(indiceGlobal(pais));}
+
+// ============================================================
+// i18n
+// ============================================================
+const SG_NAMES={
+  es:["Políticas de Ciencia Abierta","Infraestructuras y soberanía de datos","Divulgación y Formación","Evaluación","Ciencia Ciudadana y Articulación"],
+  pt:["Políticas de Ciência Aberta","Infraestruturas e soberania de dados","Divulgação e Formação","Avaliação","Ciência Cidadã e Articulação"],
+  en:["Open Science Policies","Infrastructure & data sovereignty","Outreach & Training","Evaluation","Citizen Science & Articulation"]
+};
+const i18n={
+  es:{eyebrow:"Grupo de trabajo CLACSO",lema:'<b>Producción</b>, <span class="v">gestión</span>, <span class="t">movilización</span> y <span class="vd">apropiación</span> social del conocimiento para el bien común. Conocimiento abierto, justicia epistémica y soberanía científica para América Latina y el Caribe.',pr1:"Acceso<br>abierto",pr2:"Colaboración<br>y comunidad",pr3:"Infraestructuras<br>abiertas",pr4:"Evaluación<br>responsable",pr5:"Justicia<br>epistémica",pr6:"Soberanía<br>tecnológica",nav_home:"Vista general",nav_mapa:"Mapa",nav_dim:"Dimensiones",nav_paises:"Perfiles por país",nav_metodo:"Metodología",nav_global:"Sur Global",kpi1:"Revistas OA indexadas en DOAJ (global)",kpi2:"Revistas sin cargos (modelo diamante/sin APC)",kpi3:"Publicaciones en repositorios latinoamericanos federados",kpi4:"Países miembros activos de LA Referencia",h_avance:"Índice de avance por país",h_modelo:"Modelo de publicación predominante (región)",modelo_nota:"América Latina lidera el modelo diamante: sin cargos para autores ni lectores, financiado por universidades y Estados.",h_tabla:"Resumen regional por país",leg_alto:"Avance alto (≥70)",leg_medio:"Avance medio (40–69)",leg_bajo:"Avance inicial (<40)",th_pais:"País",th_indice:"Índice global",th_ley:"Ley/Política OA",m_title:"Mapa interactivo del índice de avance",m_leg:"Índice de avance:",m_sindato:"Sin dato",m_nota:"Pasá el cursor por cada país para ver su índice. Hacé clic para abrir su perfil detallado.",dim_intro:"Las cinco dimensiones del GT",dim_desc:"Cada dimensión corresponde a un subgrupo del GT y agrupa indicadores específicos.",d1:"Políticas de Ciencia Abierta",d2:"Infraestructuras y soberanía de datos",d3:"Divulgación y Formación",d4:"Evaluación",d5:"Ciencia Ciudadana y Articulación",p_title:"Perfiles por país",met_title:"Metodología del índice",met_desc:"El índice se construye en tres niveles mediante promedio ponderado clásico (compensatorio). Cada indicador (0–100) se pondera dentro de su subgrupo; cada subíndice se pondera dentro del índice global.",met_grilla:"Grilla de indicadores por subgrupo",g_title:"Comparativa Sur Global",g_desc:"América Latina, el Caribe y España en perspectiva con otras regiones del Sur Global.",g_radar:"Perfil comparativo por dimensión",g_barras:"Revistas diamante por región (% del total OA)",pesos_h:"⚖ Ponderación de subgrupos en el índice global",foot:'Observatorio de Ciencia Abierta · GT "Ciencia Abierta como Bien Común"',foot2:"Fuentes: DOAJ, LA Referencia, Red de Repositorios Latinoamericanos, Redalyc, SciELO · Versión 2.1",nota:'ⓘ Versión 2.1 — El índice se calcula desde los archivos JSON (<code>data/SG1.json</code>…<code>SG5.json</code>). Valores representativos marcados como',sel_pais:"Seleccioná un país para ver su perfil detallado.",tl_title:"Línea de tiempo de hitos",rep:"Repositorios",revj:"Revistas OA",col_ind:"Indicador",col_peso:"Peso interno",col_fuente:"Fuente",pesos_warn:"Los pesos deben sumar 100%",pesos_ok:"Pesos balanceados"},
+  pt:{eyebrow:"Grupo de trabalho CLACSO",lema:'<b>Produção</b>, <span class="v">gestão</span>, <span class="t">mobilização</span> e <span class="vd">apropriação</span> social do conhecimento para o bem comum.',pr1:"Acesso<br>aberto",pr2:"Colaboração<br>e comunidade",pr3:"Infraestruturas<br>abertas",pr4:"Avaliação<br>responsável",pr5:"Justiça<br>epistêmica",pr6:"Soberania<br>tecnológica",nav_home:"Visão geral",nav_mapa:"Mapa",nav_dim:"Dimensões",nav_paises:"Perfis por país",nav_metodo:"Metodologia",nav_global:"Sul Global",kpi1:"Revistas OA indexadas no DOAJ (global)",kpi2:"Revistas sem taxas (diamante/sem APC)",kpi3:"Publicações em repositórios latino-americanos federados",kpi4:"Países membros ativos da LA Referencia",h_avance:"Índice de avanço por país",h_modelo:"Modelo de publicação predominante (região)",modelo_nota:"A América Latina lidera o modelo diamante: sem taxas para autores nem leitores.",h_tabla:"Resumo regional por país",leg_alto:"Avanço alto (≥70)",leg_medio:"Avanço médio (40–69)",leg_bajo:"Avanço inicial (<40)",th_pais:"País",th_indice:"Índice global",th_ley:"Lei/Política OA",m_title:"Mapa interativo do índice de avanço",m_leg:"Índice de avanço:",m_sindato:"Sem dado",m_nota:"Passe o cursor sobre cada país para ver seu índice.",dim_intro:"As cinco dimensões do GT",dim_desc:"Cada dimensão corresponde a um subgrupo do GT.",d1:"Políticas de Ciência Aberta",d2:"Infraestruturas e soberania de dados",d3:"Divulgação e Formação",d4:"Avaliação",d5:"Ciência Cidadã e Articulação",p_title:"Perfis por país",met_title:"Metodologia do índice",met_desc:"O índice é construído em três níveis mediante média ponderada clássica (compensatória).",met_grilla:"Grade de indicadores por subgrupo",g_title:"Comparativo Sul Global",g_desc:"América Latina, o Caribe e a Espanha em perspectiva com outras regiões do Sul Global.",g_radar:"Perfil comparativo por dimensão",g_barras:"Revistas diamante por região (% do total OA)",pesos_h:"⚖ Ponderação de subgrupos no índice global",foot:'Observatório de Ciência Aberta · GT "Ciência Aberta como Bem Comum"',foot2:"Fontes: DOAJ, LA Referencia, Redalyc, SciELO · Versão 2.1",sel_pais:"Selecione um país para ver seu perfil.",tl_title:"Linha do tempo de marcos",rep:"Repositórios",revj:"Revistas OA",col_ind:"Indicador",col_peso:"Peso interno",col_fuente:"Fonte",pesos_warn:"Os pesos devem somar 100%",pesos_ok:"Pesos balanceados"},
+  en:{eyebrow:"CLACSO Working Group",lema:'Social <b>production</b>, <span class="v">management</span>, <span class="t">mobilization</span> and <span class="vd">appropriation</span> of knowledge for the common good.',pr1:"Open<br>access",pr2:"Collaboration<br>& community",pr3:"Open<br>infrastructure",pr4:"Responsible<br>evaluation",pr5:"Epistemic<br>justice",pr6:"Technological<br>sovereignty",nav_home:"Overview",nav_mapa:"Map",nav_dim:"Dimensions",nav_paises:"Country profiles",nav_metodo:"Methodology",nav_global:"Global South",kpi1:"OA journals indexed in DOAJ (global)",kpi2:"Journals without fees (diamond/no-APC)",kpi3:"Records in federated Latin American repositories",kpi4:"Active member countries of LA Referencia",h_avance:"Open science progress index by country",h_modelo:"Predominant publishing model (region)",modelo_nota:"Latin America leads the diamond model: no fees for authors or readers.",h_tabla:"Regional summary by country",leg_alto:"High progress (≥70)",leg_medio:"Medium progress (40–69)",leg_bajo:"Early stage (<40)",th_pais:"Country",th_indice:"Global index",th_ley:"OA Law/Policy",m_title:"Interactive map of the progress index",m_leg:"Progress index:",m_sindato:"No data",m_nota:"Hover over each country to see its index. Click to open detailed profile.",dim_intro:"The five dimensions of the WG",dim_desc:"Each dimension matches a WG subgroup and groups specific indicators.",d1:"Open Science Policies",d2:"Infrastructure & data sovereignty",d3:"Outreach & Training",d4:"Evaluation",d5:"Citizen Science & Articulation",p_title:"Country profiles",met_title:"Index methodology",met_desc:"The index is built in three levels using classic weighted average (compensatory). Each indicator (0–100) is weighted within its subgroup; each subindex is weighted within the global index.",met_grilla:"Indicator grid by subgroup",g_title:"Global South comparison",g_desc:"Latin America, the Caribbean and Spain compared with other Global South regions.",g_radar:"Comparative profile by dimension",g_barras:"Diamond journals by region (% of total OA)",pesos_h:"⚖ Subgroup weighting in the global index",foot:'Open Science Observatory · WG "Open Science as a Common Good"',foot2:"Sources: DOAJ, LA Referencia, Redalyc, SciELO · Version 2.1",sel_pais:"Select a country to see its detailed profile.",tl_title:"Milestones timeline",rep:"Repositories",revj:"OA Journals",col_ind:"Indicator",col_peso:"Internal weight",col_fuente:"Source",pesos_warn:"Weights must sum to 100%",pesos_ok:"Balanced weights"}
+};
+
+let lang='es',charts={},currentPais='AR';
+function t(k){return i18n[lang][k]||k;}
+
+function setLang(l){
+  lang=l;
+  ['es','pt','en'].forEach(x=>document.getElementById(x).classList.toggle('active',x===l));
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n');if(!i18n[lang][k])return;
+    if(k==='lema'){el.innerHTML=i18n[lang][k];return;}
+    const span=el.querySelector('span');
+    if(span){el.childNodes[0].nodeValue=i18n[lang][k]+' ';}else{el.innerHTML=i18n[lang][k];}
+  });
+  if(paises.length){renderPesos();renderTabla();renderPaisList();renderPaisDetalle(currentPais);renderGrilla();buildCharts();drawMapa(true);}
+}
+
+function semaforoClass(v){return v>=70?'s-alto':v>=40?'s-medio':'s-bajo';}
+function scoreColor(v){return v>=70?'#7a9b3f':v>=40?'#e8a020':'#e8541e';}
+function mapColor(v){return d3.interpolateRgb('#fae0d5','#1a5f6e')(v/100);}
+
+function showView(id,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(id==='mapa')setTimeout(()=>drawMapa(false),50);
+}
+
+// ============================================================
+// PANEL DE PESOS
+// ============================================================
+function renderPesos(){
+  const row=document.getElementById('pesosRow');row.innerHTML='';
+  SG_KEYS.forEach((sgK,i)=>{
+    row.innerHTML+=`<div class="peso-item">
+      <label>${sgK} · ${SG_NAMES[lang][i]}</label>
+      <input type="range" min="0" max="50" value="${pesosSG[sgK]}" oninput="setPeso('${sgK}',this.value)">
+      <div class="val" id="val-${sgK}" style="color:${sgColors[i]}">${pesosSG[sgK]}%</div>
+    </div>`;
+  });
+  updPesoTot();updFormula();
+}
+function setPeso(sgK,v){
+  pesosSG[sgK]=parseInt(v);
+  document.getElementById('val-'+sgK).textContent=v+'%';
+  updPesoTot();updFormula();
+  renderTabla();renderPaisList();renderPaisDetalle(currentPais);buildCharts();drawMapa(true);
+}
+function updPesoTot(){
+  const tot=Object.values(pesosSG).reduce((a,b)=>a+b,0);
+  const el=document.getElementById('pesoTot');
+  el.textContent=(tot===100?t('pesos_ok'):t('pesos_warn'))+' ('+tot+'%)';
+  el.className='peso-tot '+(tot===100?'pt-ok':'pt-warn');
+}
+function updFormula(){
+  const f=`Índice = (${SG_KEYS.map(k=>pesosSG[k]+'·'+k).join(' + ')}) / ${Object.values(pesosSG).reduce((a,b)=>a+b,0)}`;
+  ['formula','formula2'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=f;});
+}
+
+// ============================================================
+// TABLA / LISTA / DETALLE
+// ============================================================
+function renderTabla(){
+  const tb=document.querySelector('#tablaResumen tbody');tb.innerHTML='';
+  [...paises].sort((a,b)=>idx(b)-idx(a)).forEach(p=>{
+    tb.innerHTML+=`<tr><td><span class="semaforo ${semaforoClass(idx(p))}"></span>${p.n}</td><td><strong>${idx(p)}</strong></td><td>${sg(p,1)}</td><td>${sg(p,2)}</td><td>${sg(p,3)}</td><td>${sg(p,4)}</td><td>${sg(p,5)}</td><td style="font-size:.8rem;">${p.ley}</td></tr>`;
+  });
+}
+function renderPaisList(){
+  const el=document.getElementById('paisList');el.innerHTML='';
+  [...paises].sort((a,b)=>idx(b)-idx(a)).forEach(p=>{
+    el.innerHTML+=`<div class="pais-item ${p.iso===currentPais?'sel':''}" onclick="selPais('${p.iso}')"><span>${p.n}</span><span class="pais-score" style="background:${scoreColor(idx(p))}22;color:${scoreColor(idx(p))};">${idx(p)}</span></div>`;
+  });
+}
+function selPais(iso){currentPais=iso;renderPaisList();renderPaisDetalle(iso);}
+function renderPaisDetalle(iso){
+  const p=paises.find(x=>x.iso===iso);
+  const el=document.getElementById('paisDetalle');
+  if(!p){el.innerHTML=`<p style="color:var(--txt-cla);">${t('sel_pais')}</p>`;return;}
+  currentPais=iso;
+  const tl=(p.hitos||[]).map(h=>`<div class="tl-item"><span class="tl-year">${h[0]}</span><div class="tl-txt">${h[1]}</div></div>`).join('');
+  el.innerHTML=`
+    <h3 style="font-size:1.2rem;">${p.n} <span class="pais-score" style="background:${scoreColor(idx(p))}22;color:${scoreColor(idx(p))};font-size:.9rem;">${t('th_indice')}: ${idx(p)}</span></h3>
+    <div style="margin:1rem 0;">${SG_KEYS.map((k,i)=>`<span class="dim-tag dim-sg${i+1}">${k} ${sg(p,i+1)}</span>`).join('')}</div>
+    <table>
+      <tr><th>${t('th_ley')}</th><td>${p.ley}</td></tr>
+      <tr><th>${t('rep')}</th><td>${p.reposit}</td></tr>
+      <tr><th>${t('revj')}</th><td>${p.revistas}</td></tr>
+    </table>
+    <div class="chart-box" style="height:220px;margin-top:1rem;"><canvas id="chartPaisDet"></canvas></div>
+    <h3 style="margin-top:1.2rem;">${t('tl_title')}</h3>
+    <div class="timeline">${tl}</div>`;
+  if(charts.paisDet)charts.paisDet.destroy();
+  charts.paisDet=new Chart(document.getElementById('chartPaisDet'),{type:'bar',
+    data:{labels:SG_KEYS,datasets:[{data:SG_KEYS.map((_,i)=>sg(p,i+1)),backgroundColor:sgColors,borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{max:100,beginAtZero:true}}}});
+}
+
+// ============================================================
+// GRILLA DE METODOLOGÍA
+// ============================================================
+function renderGrilla(){
+  const tb=document.getElementById('grillaInd');if(!tb)return;
+  let html=`<thead><tr><th>ID</th><th>${t('col_ind')}</th><th>Eje</th><th>${t('col_peso')}</th><th>${t('col_fuente')}</th></tr></thead><tbody>`;
+  SG_KEYS.forEach((sgK,i)=>{
+    const sg=indicadores[sgK];if(!sg)return;
+    html+=`<tr class="ind-sub"><td>${sgK}</td><td>${sg.nombre}</td><td></td><td>${pesosSG[sgK]}% <span style="color:var(--txt-cla);font-weight:400;">(global)</span></td><td></td></tr>`;
+    sg.items.forEach(it=>{html+=`<tr><td>${it.id}</td><td>${it.n}</td><td>${it.eje||''}</td><td>${it.p}%</td><td class="fuente-tag">${it.fuente||''}</td></tr>`;});
+  });
+  tb.innerHTML=html+'</tbody>';
+}
+
+// ============================================================
+// MAPA
+// ============================================================
+let worldData=null;
+async function loadMap(){
+  if(worldData)return worldData;
+  try{const r=await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');worldData=await r.json();}catch(e){worldData=null;}
+  return worldData;
+}
+async function drawMapa(force){
+  const cont=document.getElementById('mapa');if(!cont)return;
+  if(!force&&cont.dataset.drawn==='1'&&cont.dataset.lang===lang)return;
+  const data=await loadMap();cont.innerHTML='';
+  const scale=document.getElementById('mapScale');if(scale){scale.innerHTML='';for(let i=0;i<=10;i++){const s=document.createElement('i');s.style.background=mapColor(i*10);scale.appendChild(s);}}
+  if(!data){cont.innerHTML='<p style="padding:2rem;text-align:center;color:var(--txt-cla);">No se pudo cargar la geometría del mapa.</p>';return;}
+  const W=820,H=560;
+  const svg=d3.select(cont).append('svg').attr('viewBox',`0 0 ${W} ${H}`);
+  const countries=topojson.feature(data,data.objects.countries).features;
+  const nameMap={"Argentina":"AR","Brazil":"BR","Mexico":"MX","Chile":"CL","Colombia":"CO","Peru":"PE","Uruguay":"UY","Ecuador":"EC","Costa Rica":"CR","El Salvador":"SV","Spain":"ES","Venezuela":"VE"};
+  const byIso={};paises.forEach(p=>byIso[p.iso]=p);
+  const proj=d3.geoMercator().center([-60,-15]).scale(330).translate([W/2-90,H/2]);
+  const path=d3.geoPath().projection(proj);
+  const tooltip=document.getElementById('mapTooltip');
+  svg.selectAll('path').data(countries).enter().append('path')
+    .attr('d',path).attr('class','pais-shape')
+    .attr('fill',d=>{const iso=nameMap[d.properties.name];return(iso&&byIso[iso])?mapColor(idx(byIso[iso])):'#e8ded0';})
+    .on('mousemove',function(ev,d){
+      const iso=nameMap[d.properties.name];if(!iso||!byIso[iso]){tooltip.style.opacity=0;return;}
+      const p=byIso[iso];tooltip.innerHTML=`<b>${p.n}</b>${t('th_indice')}: ${idx(p)}`;
+      const r=cont.getBoundingClientRect();tooltip.style.left=(ev.clientX-r.left+12)+'px';tooltip.style.top=(ev.clientY-r.top+12)+'px';tooltip.style.opacity=1;})
+    .on('mouseleave',()=>tooltip.style.opacity=0)
+    .on('click',function(ev,d){
+      const iso=nameMap[d.properties.name];if(!iso||!byIso[iso])return;
+      currentPais=iso;
+      document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+      [...document.querySelectorAll('nav button')].find(b=>b.getAttribute('data-i18n')==='nav_paises')?.classList.add('active');
+      document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+      document.getElementById('paises').classList.add('active');
+      renderPaisList();renderPaisDetalle(iso);});
+  cont.dataset.drawn='1';cont.dataset.lang=lang;
+}
+
+// ============================================================
+// CHARTS
+// ============================================================
+function buildCharts(){
+  Object.keys(charts).forEach(k=>{if(k!=='paisDet'&&charts[k])charts[k].destroy();});
+  const sorted=[...paises].sort((a,b)=>idx(b)-idx(a));
+  charts.paises=new Chart(document.getElementById('chartPaises'),{type:'bar',
+    data:{labels:sorted.map(p=>p.n),datasets:[{data:sorted.map(p=>idx(p)),backgroundColor:sorted.map(p=>scoreColor(idx(p))),borderRadius:5}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{max:100}}}});
+  charts.modelo=new Chart(document.getElementById('chartModelo'),{type:'doughnut',
+    data:{labels:[lang==='es'?'Diamante (sin cargos)':lang==='pt'?'Diamante (sem taxas)':'Diamond (no fees)',lang==='es'?'Oro (con APC)':lang==='pt'?'Ouro (com APC)':'Gold (APC)',lang==='es'?'Híbrido/otro':lang==='pt'?'Híbrido/outro':'Hybrid/other'],datasets:[{data:[62,28,10],backgroundColor:['#7a9b3f','#e8a020','#e8541e']}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
+  const dimCfg=(id,nSg,color)=>{charts[id]=new Chart(document.getElementById(id),{type:'bar',
+    data:{labels:sorted.map(p=>p.iso),datasets:[{data:sorted.map(p=>sg(p,nSg)),backgroundColor:color,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{max:100}}}});};
+  if(document.getElementById('chartDim1')){[1,2,3,4,5].forEach((n,i)=>dimCfg('chartDim'+n,n,sgColors[i]));}
+  if(document.getElementById('chartRadar')){
+    charts.radar=new Chart(document.getElementById('chartRadar'),{type:'radar',
+      data:{labels:SG_NAMES[lang],datasets:[
+        {label:lang==='en'?'Latin America':'América Latina',data:[68,70,64,66,62],borderColor:'#1a5f6e',backgroundColor:'#1a5f6e33'},
+        {label:lang==='en'?'Spain':'España',data:[84,82,76,78,70],borderColor:'#6b2c5f',backgroundColor:'#6b2c5f33'},
+        {label:lang==='es'?'África subsahariana':lang==='pt'?'África subsaariana':'Sub-Saharan Africa',data:[48,45,42,44,50],borderColor:'#e8541e',backgroundColor:'#e8541e33'},
+        {label:lang==='es'?'Asia del Sur':lang==='pt'?'Ásia do Sul':'South Asia',data:[55,58,50,52,46],borderColor:'#e8a020',backgroundColor:'#e8a02033'}]},
+      options:{responsive:true,maintainAspectRatio:false,scales:{r:{max:100,beginAtZero:true,pointLabels:{font:{size:9}}}},plugins:{legend:{position:'bottom',labels:{font:{size:10}}}}}});}
+  if(document.getElementById('chartGlobalBar')){
+    charts.globalBar=new Chart(document.getElementById('chartGlobalBar'),{type:'bar',
+      data:{labels:[lang==='en'?'Latin Am.':'Am. Latina',lang==='en'?'Spain':'España',lang==='es'?'África SS':lang==='pt'?'África SS':'Sub-Sah. Africa',lang==='es'?'Asia Sur':lang==='pt'?'Ásia Sul':'South Asia',lang==='es'?'Sudeste Asia':lang==='pt'?'Sudeste Ásia':'SE Asia'],datasets:[{label:'%',data:[62,34,40,30,28],backgroundColor:['#7a9b3f','#6b2c5f','#e8541e','#e8a020','#3d4f54'],borderRadius:5}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{max:100,title:{display:true,text:'%'}}}}});}
+}
+
+// Arrancar
+init();
+</script>
+</body>
+</html>

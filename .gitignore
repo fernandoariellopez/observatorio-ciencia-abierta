@@ -1,0 +1,27 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python (local dev server)
+__pycache__/
+*.pyc
+
+# Node (si se usa en el futuro)
+node_modules/
+npm-debug.log*
+
+# Logs
+*.log

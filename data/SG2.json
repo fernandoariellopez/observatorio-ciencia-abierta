@@ -1,0 +1,28 @@
+{
+  "subgrupo": "SG2",
+  "nombre": "Infraestructuras abiertas y soberanía de datos",
+  "peso_global": 25,
+  "tipo_dato": "EST",
+  "indicadores": [
+    {"id": "2.1", "nombre": "Densidad de repositorios institucionales", "peso": 20, "eje": "Repositorios", "fuente": "OpenDOAR · ROAR · LA Referencia · Portal o Cosechador Nacional", "calculo": "Repositorios por institución de investigación, normalizado regionalmente (0–100)", "periodicidad": "Anual"},
+    {"id": "2.2", "nombre": "Integración a redes federadas", "peso": 15, "eje": "Repositorios", "fuente": "LA Referencia · OpenAIRE", "calculo": "No integrado (0) · nodo en formación (50) · nodo activo cosechado (100)", "periodicidad": "Anual"},
+    {"id": "2.4", "nombre": "Infraestructura de datos de investigación (FAIR)", "peso": 15, "eje": "Datos de investigación", "fuente": "re3data · normativa nacional", "calculo": "Sin infraestructura (0) · repositorios generales (40) · repositorios de datos FAIR (70) · con curaduría y DOI (100)", "periodicidad": "Anual"},
+    {"id": "2.5", "nombre": "Portal nacional de revistas OA Diamante", "peso": 25, "eje": "Editorial/Interoperabilidad", "fuente": "PKP Index · SciELO · Redalyc · Latindex", "calculo": "Escalonado por cobertura y soporte institucional (0–100)", "periodicidad": "Anual"},
+    {"id": "2.6", "nombre": "Participación en portales regionales de revistas OA Diamante", "peso": 15, "eje": "Editorial/Interoperabilidad", "fuente": "Latindex · SciELO · Redalyc · DOAJ · PKP Index", "calculo": "Escalonado por cobertura y participación regional (0–100)", "periodicidad": "Anual"},
+    {"id": "2.7", "nombre": "Soberanía tecnológica de la infraestructura", "peso": 10, "eje": "Editorial/Interoperabilidad", "fuente": "Relevamiento · AmeliCA", "calculo": "Alta dependencia comercial (0) · mixta (50) · infraestructura pública/comunitaria (100)", "periodicidad": "Bienal"}
+  ],
+  "valores": {
+    "AR": {"2.1": 82, "2.2": 85, "2.4": 76, "2.5": 84, "2.6": 80, "2.7": 78},
+    "BR": {"2.1": 92, "2.2": 90, "2.4": 88, "2.5": 92, "2.6": 90, "2.7": 86},
+    "MX": {"2.1": 74, "2.2": 76, "2.4": 70, "2.5": 80, "2.6": 78, "2.7": 72},
+    "CL": {"2.1": 72, "2.2": 74, "2.4": 68, "2.5": 72, "2.6": 70, "2.7": 66},
+    "CO": {"2.1": 70, "2.2": 72, "2.4": 66, "2.5": 74, "2.6": 72, "2.7": 68},
+    "PE": {"2.1": 62, "2.2": 64, "2.4": 58, "2.5": 64, "2.6": 62, "2.7": 58},
+    "UY": {"2.1": 60, "2.2": 64, "2.4": 56, "2.5": 60, "2.6": 60, "2.7": 56},
+    "EC": {"2.1": 56, "2.2": 58, "2.4": 52, "2.5": 58, "2.6": 56, "2.7": 52},
+    "CR": {"2.1": 60, "2.2": 62, "2.4": 56, "2.5": 62, "2.6": 60, "2.7": 56},
+    "SV": {"2.1": 44, "2.2": 46, "2.4": 40, "2.5": 44, "2.6": 44, "2.7": 40},
+    "ES": {"2.1": 84, "2.2": 82, "2.4": 84, "2.5": 80, "2.6": 80, "2.7": 70},
+    "VE": {"2.1": 40, "2.2": 42, "2.4": 36, "2.5": 42, "2.6": 40, "2.7": 38}
+  }
+}

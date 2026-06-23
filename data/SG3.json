@@ -1,0 +1,27 @@
+{
+  "subgrupo": "SG3",
+  "nombre": "Divulgación y Formación",
+  "peso_global": 15,
+  "tipo_dato": "EST",
+  "indicadores": [
+    {"id": "3.1", "nombre": "Oferta formativa en ciencia abierta", "peso": 20, "eje": "Formación", "fuente": "Relevamiento · universidades · redes regionales", "calculo": "Sin oferta (0) · cursos aislados (40) · oferta sostenida (70) · programas formales acreditados (100)", "periodicidad": "Anual"},
+    {"id": "3.2", "nombre": "Capacidades instaladas en bibliotecas/oficinas de OA", "peso": 20, "eje": "Formación", "fuente": "Relevamiento institucional", "calculo": "% de instituciones con unidad/equipo de apoyo a OA, normalizado", "periodicidad": "Anual"},
+    {"id": "3.3", "nombre": "Alfabetización en datos, OA y otros elementos de la CA", "peso": 20, "eje": "Formación", "fuente": "Relevamiento de programas de posgrado y servicios de Bibliotecas/oficinas de OA", "calculo": "Ausente (0) · electivas (40) · contenidos transversales (70) · obligatorias con práctica (100)", "periodicidad": "Bienal"},
+    {"id": "3.4", "nombre": "Eventos y comunidades activas", "peso": 20, "eje": "Comunidad", "fuente": "Relevamiento · redes regionales", "calculo": "Escalonado por frecuencia y continuidad (0–100)", "periodicidad": "Anual"},
+    {"id": "3.5", "nombre": "Producción de divulgación científica abierta", "peso": 20, "eje": "Comunicación pública", "fuente": "Relevamiento · redes regionales", "calculo": "Escalonado por cantidad y continuidad de iniciativas (0–100)", "periodicidad": "Anual"}
+  ],
+  "valores": {
+    "AR": {"3.1": 74, "3.2": 72, "3.3": 70, "3.4": 72, "3.5": 72},
+    "BR": {"3.1": 80, "3.2": 78, "3.3": 76, "3.4": 78, "3.5": 78},
+    "MX": {"3.1": 74, "3.2": 73, "3.3": 72, "3.4": 73, "3.5": 73},
+    "CL": {"3.1": 68, "3.2": 68, "3.3": 66, "3.4": 68, "3.5": 70},
+    "CO": {"3.1": 72, "3.2": 71, "3.3": 70, "3.4": 71, "3.5": 71},
+    "PE": {"3.1": 60, "3.2": 60, "3.3": 58, "3.4": 60, "3.5": 62},
+    "UY": {"3.1": 58, "3.2": 58, "3.3": 56, "3.4": 58, "3.5": 60},
+    "EC": {"3.1": 52, "3.2": 52, "3.3": 50, "3.4": 52, "3.5": 54},
+    "CR": {"3.1": 55, "3.2": 55, "3.3": 54, "3.4": 55, "3.5": 56},
+    "SV": {"3.1": 38, "3.2": 38, "3.3": 36, "3.4": 38, "3.5": 40},
+    "ES": {"3.1": 78, "3.2": 76, "3.3": 74, "3.4": 76, "3.5": 76},
+    "VE": {"3.1": 35, "3.2": 35, "3.3": 34, "3.4": 35, "3.5": 36}
+  }
+}
