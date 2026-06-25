@@ -1,0 +1,32 @@
+{
+  "titulo": "Cronología de la Ciencia Abierta en ALyC",
+  "tipo_dato": "EST",
+  "hitos": [
+    {"ano": 1995, "entidad": "BIREME/OPS", "hito": "Lanzamiento de LILACS, primer repositorio bibliográfico regional de ciencias de la salud en América Latina y el Caribe", "fuente": "1"},
+    {"ano": 1998, "entidad": "Brasil", "hito": "Creación de SciELO (Scientific Electronic Library Online), primer portal regional de revistas científicas en acceso abierto", "fuente": "2"},
+    {"ano": 2001, "entidad": "CLACSO", "hito": "Lanzamiento del Repositorio Virtual de CLACSO, uno de los primeros repositorios temáticos de ciencias sociales en la región", "fuente": "3"},
+    {"ano": 2002, "entidad": "México/UAEM", "hito": "Inicio del proyecto Redalyc (Red de Revistas Científicas de América Latina y el Caribe, España y Portugal)", "fuente": "4"},
+    {"ano": 2003, "entidad": "Internacional", "hito": "Declaración de Berlín sobre Acceso Abierto: primeras adhesiones de instituciones latinoamericanas", "fuente": "5"},
+    {"ano": 2005, "entidad": "Regional", "hito": "Declaración de Salvador sobre acceso abierto: la perspectiva del mundo en desarrollo", "fuente": "6"},
+    {"ano": 2007, "entidad": "Regional", "hito": "Latindex consolida su directorio como sistema regional de información sobre revistas científicas de América Latina, el Caribe, España y Portugal", "fuente": "7"},
+    {"ano": 2011, "entidad": "España", "hito": "Aprobación de la Ley de la Ciencia, la Tecnología y la Innovación con mandato de acceso abierto para producción financiada públicamente", "fuente": "8"},
+    {"ano": 2012, "entidad": "Regional", "hito": "Fundación formal de LA Referencia como red de repositorios de acceso abierto de América Latina", "fuente": "9"},
+    {"ano": 2013, "entidad": "Argentina", "hito": "Sanción de la Ley 26.899 de creación de repositorios digitales institucionales de acceso abierto en ciencia y tecnología", "fuente": "10"},
+    {"ano": 2013, "entidad": "Perú", "hito": "Promulgación de la Ley 30035 que regula el repositorio nacional digital de ciencia, tecnología e innovación (ALICIA/CONCYTEC)", "fuente": "11"},
+    {"ano": 2014, "entidad": "Colombia", "hito": "Colombia establece su política de acceso abierto y se suma a LA Referencia como nodo nacional activo", "fuente": "12"},
+    {"ano": 2015, "entidad": "Brasil", "hito": "CAPES y CNPq establecen políticas formales de acceso abierto para producción científica financiada con fondos federales", "fuente": "13"},
+    {"ano": 2017, "entidad": "México", "hito": "Declaración de México en favor del ecosistema latinoamericano de acceso abierto no comercial (Redalyc/UAEM)", "fuente": "14"},
+    {"ano": 2018, "entidad": "UNESCO/AmeliCA", "hito": "Lanzamiento de AmeliCA, infraestructura comunitaria latinoamericana de publicación y comunicación científica abierta", "fuente": "15"},
+    {"ano": 2019, "entidad": "CLACSO", "hito": "Creación de FOLEC (Foro Latinoamericano de Evaluación Científica) para impulsar la reforma de la evaluación académica en la región", "fuente": "16"},
+    {"ano": 2020, "entidad": "Regional", "hito": "La pandemia de COVID-19 impulsa la apertura masiva de datos científicos y publicaciones de salud en toda la región", "fuente": "17"},
+    {"ano": 2021, "entidad": "UNESCO", "hito": "Aprobación de la Recomendación de la UNESCO sobre Ciencia Abierta, primer instrumento normativo internacional intergubernamental sobre el tema", "fuente": "18"},
+    {"ano": 2021, "entidad": "CLACSO/FOLEC", "hito": "Declaración de CLACSO y FOLEC por una nueva evaluación académica y científica para una ciencia con relevancia social en ALyC", "fuente": "19"},
+    {"ano": 2022, "entidad": "España", "hito": "Reforma de la Ley de la Ciencia que establece el acceso abierto inmediato y obligatorio para publicaciones financiadas con fondos públicos", "fuente": "20"},
+    {"ano": 2022, "entidad": "CLACSO", "hito": "CLACSO emite declaración de apoyo a las Recomendaciones de la UNESCO sobre Ciencia Abierta", "fuente": "21"},
+    {"ano": 2023, "entidad": "Global/CLACSO", "hito": "Primera Cumbre Global de Acceso Abierto Diamante, con participación activa de Redalyc y CLACSO en el Comité Supervisor Internacional", "fuente": "22"},
+    {"ano": 2023, "entidad": "Global", "hito": "Publicación del Manifiesto sobre la Ciencia como Bien Público Global: Acceso Abierto No Comercial", "fuente": "23"},
+    {"ano": 2024, "entidad": "Angola/AmeliCA", "hito": "Alianza entre Redalyc, AmeliCA y la Universidad Óscar Ribas de Angola para implementar estrategia nacional de acceso abierto y datos abiertos", "fuente": "24"},
+    {"ano": 2025, "entidad": "CLACSO/FOLEC", "hito": "Manifiesto de Bogotá: Hacia una ciencia abierta, democrática y socialmente relevante en América Latina y el Caribe", "fuente": "25"},
+    {"ano": 2026, "entidad": "CLACSO", "hito": "Lanzamiento del GT 'Ciencia Abierta como Bien Común' 2026–2028 y del Observatorio de Ciencia Abierta — Sur Global", "fuente": "26"}
+  ]
+}
